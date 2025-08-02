@@ -29,15 +29,14 @@ public class UserService {
         return userRepository.findAll();
     }
 
-    @Transactional
-    public User updateUser(Integer id, User user) {
-        User foundUser = userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("User not found with id: "+id));
+    @Transactional(readOnly = true)
+    public Optional<User> getUserByUsername(String username) {
+        return userRepository.findByUsername(username);
+    }
 
-        foundUser.setUsername(user.getUsername());
-        foundUser.setFullName(user.getFullName());
-
-        return userRepository.save(foundUser);
+    @Transactional(readOnly = true)
+    public Optional<User> getUserByEmail(String email) {
+        return userRepository.findByEmail(email);
     }
 
     @Transactional

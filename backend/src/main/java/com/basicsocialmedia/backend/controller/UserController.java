@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/users")
@@ -15,11 +16,23 @@ public class UserController {
 
     public UserController(UserService userService) { this.userService = userService; }
 
-    // GET /api/users
+    // GET /api/users(?username="")(?email="")
     @GetMapping
-    public ResponseEntity<List<User>> getAllUsers() {
-        List<User> users = userService.getAllUsers();
-        return new ResponseEntity<>(users, HttpStatus.OK);
+    public ResponseEntity<?> getUsersByQueryParam(
+            @RequestParam(required = false) String username,
+            @RequestParam(required = false) String email) {
+        if (username != null) {
+            Optional<User> user = userService.getUserByUsername(username);
+            return user.map(u -> new ResponseEntity<>(u, HttpStatus.OK))
+                    .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
+        }
+        if (email != null) {
+            Optional<User> user = userService.getUserByEmail(email);
+            return user.map(u -> new ResponseEntity<>(u, HttpStatus.OK))
+                    .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
+        }
+        List<User> allUsers = userService.getAllUsers();
+        return new ResponseEntity<>(allUsers, HttpStatus.OK);
     }
 
     // GET /api/users/{id}
